@@ -36,7 +36,8 @@ void update_cpu_temp(int is_running) {
     cpu_temp = 20;
   }
 
-  // printf("CPU Temp: %d\n", cpu_temp);
+  //uncomment to print cpu temp every time it changes
+  //printf("CPU Temp: %d\n", cpu_temp);
 }
 
 

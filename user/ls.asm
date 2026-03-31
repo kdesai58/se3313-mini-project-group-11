@@ -60,8 +60,8 @@ fmtname(char *path)
   4e:	26a000ef          	jal	2b8 <strlen>
   52:	862a                	mv	a2,a0
   54:	85a6                	mv	a1,s1
-  56:	00001517          	auipc	a0,0x1
-  5a:	fba50513          	addi	a0,a0,-70 # 1010 <buf.0>
+  56:	00002517          	auipc	a0,0x2
+  5a:	fba50513          	addi	a0,a0,-70 # 2010 <buf.0>
   5e:	3d2000ef          	jal	430 <memmove>
   memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
   62:	8526                	mv	a0,s1
@@ -74,8 +74,8 @@ fmtname(char *path)
   76:	4639                	li	a2,14
   78:	9e09                	subw	a2,a2,a0
   7a:	02000593          	li	a1,32
-  7e:	00001717          	auipc	a4,0x1
-  82:	f9270713          	addi	a4,a4,-110 # 1010 <buf.0>
+  7e:	00002717          	auipc	a4,0x2
+  82:	f9270713          	addi	a4,a4,-110 # 2010 <buf.0>
   86:	84ba                	mv	s1,a4
   88:	00f70533          	add	a0,a4,a5
   8c:	258000ef          	jal	2e4 <memset>
@@ -1547,8 +1547,8 @@ free(void *ap)
   bp = (Header*)ap - 1;
  996:	ff050693          	addi	a3,a0,-16
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
- 99a:	00000797          	auipc	a5,0x0
- 99e:	6667b783          	ld	a5,1638(a5) # 1000 <freep>
+ 99a:	00001797          	auipc	a5,0x1
+ 99e:	6667b783          	ld	a5,1638(a5) # 2000 <freep>
  9a2:	a039                	j	9b0 <free+0x22>
     if(p >= p->s.ptr && (bp > p || bp < p->s.ptr))
  9a4:	6398                	ld	a4,0(a5)
@@ -1587,8 +1587,8 @@ free(void *ap)
   } else
     p->s.ptr = bp;
   freep = p;
- 9e8:	00000717          	auipc	a4,0x0
- 9ec:	60f73c23          	sd	a5,1560(a4) # 1000 <freep>
+ 9e8:	00001717          	auipc	a4,0x1
+ 9ec:	60f73c23          	sd	a5,1560(a4) # 2000 <freep>
 }
  9f0:	60a2                	ld	ra,8(sp)
  9f2:	6402                	ld	s0,0(sp)
@@ -1634,8 +1634,8 @@ malloc(uint nbytes)
  a2e:	2985                	addiw	s3,s3,1
  a30:	894e                	mv	s2,s3
   if((prevp = freep) == 0){
- a32:	00000517          	auipc	a0,0x0
- a36:	5ce53503          	ld	a0,1486(a0) # 1000 <freep>
+ a32:	00001517          	auipc	a0,0x1
+ a36:	5ce53503          	ld	a0,1486(a0) # 2000 <freep>
  a3a:	c905                	beqz	a0,a6a <malloc+0x56>
     base.s.ptr = freep = prevp = &base;
     base.s.size = 0;
@@ -1663,8 +1663,8 @@ malloc(uint nbytes)
       return (void*)(p + 1);
     }
     if(p == freep)
- a5e:	00000497          	auipc	s1,0x0
- a62:	5a248493          	addi	s1,s1,1442 # 1000 <freep>
+ a5e:	00001497          	auipc	s1,0x1
+ a62:	5a248493          	addi	s1,s1,1442 # 2000 <freep>
   if(p == SBRK_ERROR)
  a66:	5afd                	li	s5,-1
  a68:	a83d                	j	aa6 <malloc+0x92>
@@ -1673,10 +1673,10 @@ malloc(uint nbytes)
  a6e:	e456                	sd	s5,8(sp)
  a70:	e05a                	sd	s6,0(sp)
     base.s.ptr = freep = prevp = &base;
- a72:	00000797          	auipc	a5,0x0
- a76:	5ae78793          	addi	a5,a5,1454 # 1020 <base>
- a7a:	00000717          	auipc	a4,0x0
- a7e:	58f73323          	sd	a5,1414(a4) # 1000 <freep>
+ a72:	00001797          	auipc	a5,0x1
+ a76:	5ae78793          	addi	a5,a5,1454 # 2020 <base>
+ a7a:	00001717          	auipc	a4,0x1
+ a7e:	58f73323          	sd	a5,1414(a4) # 2000 <freep>
  a82:	e39c                	sd	a5,0(a5)
     base.s.size = 0;
  a84:	0007a423          	sw	zero,8(a5)
@@ -1732,8 +1732,8 @@ malloc(uint nbytes)
         p->s.size = nunits;
  ae0:	0137a423          	sw	s3,8(a5)
       freep = prevp;
- ae4:	00000717          	auipc	a4,0x0
- ae8:	50a73e23          	sd	a0,1308(a4) # 1000 <freep>
+ ae4:	00001717          	auipc	a4,0x1
+ ae8:	50a73e23          	sd	a0,1308(a4) # 2000 <freep>
       return (void*)(p + 1);
  aec:	01078513          	addi	a0,a5,16
   }
