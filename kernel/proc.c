@@ -463,6 +463,176 @@ kwait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
+//
+// THERMAL-AWARE SCHEDULING POLICY
+// ================================
+// Every RUNNABLE process carries a heat score (0..MAX_HEAT).
+//   heat += HEAT_INCREMENT  each time the process is scheduled.
+//   heat -= HEAT_DECAY      each scheduler tick when idle.
+// The CPU carries a global cpu_temp (20..100).
+//
+// Zone        | cpu_temp range | Policy
+// ----------- | -------------- | -----------------------------------
+// COOL        |  < WARM_TEMP   | No restriction – any process may run.
+// WARM        | >= WARM_TEMP   | Skip processes with heat >= HEAT_WARM_THRESH.
+// HOT         | >= HOT_TEMP    | Skip processes with heat >= HEAT_COOL_THRESH.
+// THROTTLE    | >= THROTTLE_TEMP | Force idle – no process runs this tick.
+//
+// Anti-starvation: if a process has waited >= STARVE_TICKS scheduler
+// rounds it bypasses the thermal gate regardless of heat.
+//
+// Selection order:
+//   Pass A – schedtest children (lowest PID, thermal-gated)
+//   Pass B – general RUNNABLE (lowest heat, thermal-gated)
+//   Pass C – fallback (any RUNNABLE, no gate – prevents deadlock)
+//
+#define STARVE_TICKS 200  // bypass thermal gate after this many skips
+
+// =========================================================
+//  Thermal metrics tracking  (for end-of-run summary)
+// =========================================================
+#define MAX_TRACKED_PIDS 16
+
+struct thermal_metrics {
+  int pid;               // 0 = unused slot
+  int sched_count;       // times this PID was scheduled
+  int skip_count;        // times this PID was thermally skipped
+  int heat_sum;          // sum of heat at each schedule (for avg)
+  int heat_min;          // min heat observed when scheduled
+  int heat_max;          // max heat observed when scheduled
+};
+
+static struct thermal_metrics tm[MAX_TRACKED_PIDS];
+static int   tm_temp_sum   = 0;   // sum of cpu_temp at each schedule
+static int   tm_temp_count = 0;   // count of schedule events
+static int   tm_temp_min   = 100;
+static int   tm_temp_max   = 0;
+static int   tm_cooling_cycles = 0;
+static int   tm_had_children = 0; // 1 if we saw schedtest children
+
+static struct thermal_metrics*
+tm_find(int pid)
+{
+  // find existing or allocate a new slot
+  for(int i = 0; i < MAX_TRACKED_PIDS; i++){
+    if(tm[i].pid == pid) return &tm[i];
+  }
+  for(int i = 0; i < MAX_TRACKED_PIDS; i++){
+    if(tm[i].pid == 0){
+      tm[i].pid = pid;
+      tm[i].heat_min = MAX_HEAT + 1;
+      tm[i].heat_max = -1;
+      return &tm[i];
+    }
+  }
+  return 0; // table full
+}
+
+static void
+tm_record_schedule(int pid, int heat)
+{
+  struct thermal_metrics *m = tm_find(pid);
+  if(!m) return;
+  m->sched_count++;
+  m->heat_sum += heat;
+  if(heat < m->heat_min) m->heat_min = heat;
+  if(heat > m->heat_max) m->heat_max = heat;
+  tm_temp_sum += cpu_temp;
+  tm_temp_count++;
+  if(cpu_temp < tm_temp_min) tm_temp_min = cpu_temp;
+  if(cpu_temp > tm_temp_max) tm_temp_max = cpu_temp;
+}
+
+static void
+tm_record_skip(int pid)
+{
+  struct thermal_metrics *m = tm_find(pid);
+  if(!m) return;
+  m->skip_count++;
+}
+
+// Print integer right-aligned in a field of 'width' characters.
+// xv6 printf has no width specifiers, so we do it manually.
+static void
+printpad(int val, int width)
+{
+  // Count digits
+  int tmp = val;
+  int digits = 0;
+  if(tmp <= 0) digits = 1;
+  while(tmp > 0){ digits++; tmp /= 10; }
+  // Print leading spaces
+  for(int i = 0; i < width - digits; i++)
+    printf(" ");
+  printf("%d", val);
+}
+
+static void
+tm_print_summary(void)
+{
+  printf("\n");
+  printf("  ============================================================\n");
+  printf("  ===          THERMAL SCHEDULING SUMMARY                  ===\n");
+  printf("  ============================================================\n");
+  printf("\n");
+
+  // CPU Temperature stats
+  int avg_temp = tm_temp_count > 0 ? tm_temp_sum / tm_temp_count : 0;
+  printf("  CPU Temperature\n");
+  printf("  -----------------------------------------------------------\n");
+  printf("    Average : %d    Min : %d    Max : %d\n", avg_temp, tm_temp_min, tm_temp_max);
+  printf("    Cooling cycles (throttled) : %d\n", tm_cooling_cycles);
+  printf("    Total schedule events      : %d\n", tm_temp_count);
+  printf("\n");
+
+  // Per-PID table
+  printf("  Per-Process Heat Metrics\n");
+  printf("  ---------------------------------------------------------------\n");
+  printf("  PID  | Scheduled | Skipped | Avg Heat | Min Heat | Max Heat\n");
+  printf("  ---------------------------------------------------------------\n");
+  for(int i = 0; i < MAX_TRACKED_PIDS; i++){
+    if(tm[i].pid == 0) continue;
+    int avg_heat = tm[i].sched_count > 0
+                   ? tm[i].heat_sum / tm[i].sched_count : 0;
+    int mn = tm[i].heat_min <= MAX_HEAT ? tm[i].heat_min : 0;
+    int mx = tm[i].heat_max >= 0        ? tm[i].heat_max : 0;
+    printf("  ");
+    printpad(tm[i].pid, 4);
+    printf("  |");
+    printpad(tm[i].sched_count, 10);
+    printf(" |");
+    printpad(tm[i].skip_count, 8);
+    printf(" |");
+    printpad(avg_heat, 9);
+    printf(" |");
+    printpad(mn, 9);
+    printf(" |");
+    printpad(mx, 9);
+    printf("\n");
+  }
+  printf("  ---------------------------------------------------------------\n");
+  printf("\n");
+}
+
+static void
+tm_reset(void)
+{
+  for(int i = 0; i < MAX_TRACKED_PIDS; i++){
+    tm[i].pid = 0;
+    tm[i].sched_count = 0;
+    tm[i].skip_count = 0;
+    tm[i].heat_sum = 0;
+    tm[i].heat_min = MAX_HEAT + 1;
+    tm[i].heat_max = -1;
+  }
+  tm_temp_sum = 0;
+  tm_temp_count = 0;
+  tm_temp_min = 100;
+  tm_temp_max = 0;
+  tm_cooling_cycles = 0;
+  tm_had_children = 0;
+}
+
 void
 scheduler(void)
 {
@@ -470,6 +640,7 @@ scheduler(void)
   struct cpu *c = mycpu();
   struct proc *chosen = 0;
   static int sched_round = 0;   // for periodic thermal logging
+  int skipped;                   // count of thermally-skipped procs this round
 
   c->proc = 0;
   for(;;){
@@ -478,10 +649,34 @@ scheduler(void)
     intr_off();
 
     chosen = 0;
+    skipped = 0;
     sched_round++;
 
     // =========================================================
-    //  STEP 1 – Heat decay for every idle (non‑RUNNING) process
+    //  STEP 0 – Detect end of schedtest and print summary
+    // =========================================================
+    if(tm_had_children){
+      int still_active = 0;
+      for(p = proc; p < &proc[NPROC]; p++){
+        acquire(&p->lock);
+        if(p->state != UNUSED && p->state != ZOMBIE &&
+           p->parent != 0 &&
+           strncmp(p->parent->name, "schedtest", 9) == 0){
+          still_active = 1;
+          release(&p->lock);
+          break;
+        }
+        release(&p->lock);
+      }
+      if(!still_active){
+        tm_print_summary();
+        tm_reset();
+      }
+    }
+
+    // =========================================================
+    //  STEP 1 – Heat decay for every idle (non-RUNNING) process
+    //           Processes cool down while they are not using CPU.
     // =========================================================
     for(p = proc; p < &proc[NPROC]; p++){
       acquire(&p->lock);
@@ -495,18 +690,31 @@ scheduler(void)
     }
 
     // =========================================================
-    //  STEP 2 – Active throttle: force idle when CPU is too hot
+    //  STEP 2 – Hard throttle: force idle when CPU is critical
+    //           No process runs; CPU gets a full cooling cycle.
     // =========================================================
     if(cpu_temp >= THROTTLE_TEMP){
+      tm_cooling_cycles++;
       if(sched_round % THERMAL_LOG_INTERVAL == 0)
         printf("  [COOLING] Temp: %d/%d  | Throttling -- idle cycle to cool down\n", cpu_temp, THROTTLE_TEMP);
       update_cpu_temp(0);  // idle cooling
       asm volatile("wfi");
-      continue;            // restart scheduler loop without running anyone
+      continue;            // restart scheduler loop
     }
 
     // =========================================================
-    //  STEP 3 – Thermal‑aware process selection
+    //  STEP 3 – Thermal-aware process selection
+    //
+    //  The thermal gate decides whether a process is allowed to
+    //  run based on:  cpu_temp  x  process heat  x  waiting_tick
+    //
+    //  Returns 1 = SKIP this process, 0 = ALLOW.
+    //
+    //  Policy matrix:
+    //   cpu_temp < WARM  => allow everything
+    //   cpu_temp >= WARM => skip if heat >= HEAT_WARM_THRESH (60)
+    //   cpu_temp >= HOT  => skip if heat >= HEAT_COOL_THRESH (30)
+    //   (but always allow if waiting_tick >= STARVE_TICKS)
     // =========================================================
 
     // --- Pass A: among schedtest children, pick lowest PID that
@@ -514,18 +722,29 @@ scheduler(void)
     for(p = proc; p < &proc[NPROC]; p++){
       acquire(&p->lock);
       if(p->state == RUNNABLE){
-        // ---- thermal gate ----
-        if(cpu_temp >= HOT_TEMP && p->heat >= HEAT_COOL_THRESH){
-          release(&p->lock);
-          continue;   // CPU hot → skip hot processes
+        // ---- thermal gate (with starvation bypass) ----
+        int dominated = 0;
+        if(p->waiting_tick < STARVE_TICKS){
+          if(cpu_temp >= HOT_TEMP && p->heat >= HEAT_COOL_THRESH)
+            dominated = 1;   // CPU hot: only cool processes allowed
+          else if(cpu_temp >= WARM_TEMP && p->heat >= HEAT_WARM_THRESH)
+            dominated = 1;   // CPU warm: skip very hot processes
         }
-        if(cpu_temp >= WARM_TEMP && p->heat >= HEAT_WARM_THRESH){
+        // else: starved process bypasses the gate
+
+        if(dominated){
+          skipped++;
+          tm_record_skip(p->pid);
+          if(sched_round % THERMAL_LOG_INTERVAL == 0)
+            printf("  [SKIPPED] PID: %d | Heat: %d | Waited: %d | Temp: %d\n",
+                   p->pid, p->heat, p->waiting_tick, cpu_temp);
           release(&p->lock);
-          continue;   // CPU warm → skip very hot processes
+          continue;
         }
         // ---- schedtest priority: lowest PID ----
         if(p->parent != 0 &&
            strncmp(p->parent->name, "schedtest", 9) == 0){
+          tm_had_children = 1;
           if(chosen == 0 || p->pid < chosen->pid)
             chosen = p;
         }
@@ -535,18 +754,23 @@ scheduler(void)
 
     // --- Pass B: if no schedtest child found, pick the RUNNABLE
     //             process with the *lowest heat* that passes the
-    //             thermal gate (thermal‑aware, prefer cooler procs).
+    //             thermal gate (prefer cooler procs to spread heat).
     if(chosen == 0){
       int lowest_heat = MAX_HEAT + 1;
       for(p = proc; p < &proc[NPROC]; p++){
         acquire(&p->lock);
         if(p->state == RUNNABLE){
-          // thermal gate
-          if(cpu_temp >= HOT_TEMP && p->heat >= HEAT_COOL_THRESH){
-            release(&p->lock);
-            continue;
+          // thermal gate (with starvation bypass)
+          int dominated = 0;
+          if(p->waiting_tick < STARVE_TICKS){
+            if(cpu_temp >= HOT_TEMP && p->heat >= HEAT_COOL_THRESH)
+              dominated = 1;
+            else if(cpu_temp >= WARM_TEMP && p->heat >= HEAT_WARM_THRESH)
+              dominated = 1;
           }
-          if(cpu_temp >= WARM_TEMP && p->heat >= HEAT_WARM_THRESH){
+          if(dominated){
+            skipped++;
+            tm_record_skip(p->pid);
             release(&p->lock);
             continue;
           }
@@ -559,8 +783,9 @@ scheduler(void)
       }
     }
 
-    // --- Pass C: anti‑starvation fallback – if every RUNNABLE
-    //             process was throttled, pick *any* RUNNABLE.
+    // --- Pass C: anti-starvation fallback – if every RUNNABLE
+    //             process was throttled, pick *any* RUNNABLE so
+    //             the system never deadlocks.
     if(chosen == 0){
       for(p = proc; p < &proc[NPROC]; p++){
         acquire(&p->lock);
@@ -574,7 +799,9 @@ scheduler(void)
     }
 
     // =========================================================
-    //  STEP 4 – Bookkeeping for non‑chosen RUNNABLE procs
+    //  STEP 4 – Bookkeeping for non-chosen RUNNABLE procs
+    //           Increment waiting_tick so starved procs eventually
+    //           bypass the thermal gate.
     // =========================================================
     for(p = proc; p < &proc[NPROC]; p++){
       acquire(&p->lock);
@@ -585,7 +812,9 @@ scheduler(void)
     }
 
     // =========================================================
-    //  STEP 5 – Context‑switch (or idle)
+    //  STEP 5 – Context-switch (or idle)
+    //           Safely transition chosen process to RUNNING,
+    //           update c->proc, and perform the context switch.
     // =========================================================
     if(chosen == 0){
       update_cpu_temp(0);  // idle cooling
@@ -593,17 +822,29 @@ scheduler(void)
     } else {
       acquire(&chosen->lock);
       if(chosen->state == RUNNABLE){
+        // --- Thermal zone label ---
+        char *zone = "COOL";
+        if(cpu_temp >= HOT_TEMP)       zone = "HOT ";
+        else if(cpu_temp >= WARM_TEMP) zone = "WARM";
+
         // --- Periodic thermal log ---
         if(sched_round % THERMAL_LOG_INTERVAL == 0){
-          char *zone = "COOL";
-          if(cpu_temp >= 80) zone = "HOT ";
-          else if(cpu_temp >= 60) zone = "WARM";
-          printf("  [THERMAL] Temp: %d [%s] | PID: %d | Heat: %d | %s\n",
+          printf("  [THERMAL] Temp: %d [%s] | PID: %d | Heat: %d | %s",
                  cpu_temp, zone, chosen->pid, chosen->heat, chosen->name);
+          if(skipped > 0)
+            printf(" | %d skipped", skipped);
+          printf("\n");
         }
 
+        // Transition to RUNNING
         chosen->state = RUNNING;
         c->proc = chosen;
+
+        // Record thermal metrics
+        tm_record_schedule(chosen->pid, chosen->heat);
+
+        // Reset waiting_tick since this process is now scheduled
+        chosen->waiting_tick = 0;
 
         // Increment process heat proportional to running
         chosen->heat += HEAT_INCREMENT;
@@ -613,8 +854,10 @@ scheduler(void)
         // CPU temp rises based on the running process's heat
         update_cpu_temp(chosen->heat);
 
+        // Context switch into the chosen process
         swtch(&c->context, &chosen->context);
 
+        // Process yielded back – clear c->proc
         c->proc = 0;
       }
       release(&chosen->lock);
