@@ -234,19 +234,53 @@ def build_plots(records, output_prefix, show, pid_to_child):
     fig, ax = plt.subplots(figsize=(14, 7))
     ax.plot(steps, temps, label="CPU temp", color="#d62728", linewidth=2.5)
 
+    color_map = plt.cm.get_cmap("tab10")
+    pid_colors = {}
+    for idx, pid in enumerate(sorted(pid_lines.keys())):
+        pid_colors[pid] = color_map(idx % 10)
+
+    pid_xs = []
+    pid_ys = []
     for pid, series in sorted(pid_lines.items()):
         xs, ys = zip(*series)
         child = pid_to_child.get(pid)
         label = f"Child {child} (PID {pid})" if child is not None else f"PID {pid}"
-        ax.plot(xs, ys, marker="o", linestyle="--", linewidth=1.4, markersize=4, label=label)
+        ax.plot(
+            xs,
+            ys,
+            marker="o",
+            linestyle="--",
+            linewidth=1.4,
+            markersize=4,
+            color=pid_colors[pid],
+            label=label,
+        )
+        pid_xs.extend(xs)
+        pid_ys.extend([pid] * len(xs))
+
+    # Scatter plot showing which PID ran at each thermal sample.
+    ax2 = ax.twinx()
+    ax2.scatter(
+        pid_xs,
+        pid_ys,
+        color="#555555",
+        marker="x",
+        s=36,
+        alpha=0.8,
+        label="PID run",
+    )
 
     ax.set_title("schedtest thermal trace: CPU temperature and process heat over time")
     ax.set_xlabel("Thermal log sample")
     ax.set_ylabel("Temperature / Heat")
+    ax2.set_ylabel("PID")
     ax.set_ylim(0, 105)
+    max_pid = max(pid_lines.keys()) if pid_lines else 1
+    ax2.set_ylim(0.5, max_pid + 0.5)
+    ax2.set_yticks(sorted(pid_lines.keys()))
     ax.grid(True, alpha=0.25)
-    ax.legend(loc="best", fontsize="small", ncol=2)
-    fig.tight_layout()
+    ax.legend(loc="upper left", fontsize="small", ncol=2, frameon=False)
+    fig.tight_layout(rect=[0, 0, 0.78, 1])
 
     figure_file = f"{output_prefix}.png"
     fig.savefig(figure_file, dpi=200)

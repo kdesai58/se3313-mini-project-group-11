@@ -1,0 +1,68 @@
+[THERMAL] Temp: 43 [COOL] | PID: 8 | Heat: 14 | schedtest
+  [THERMAL] Temp: 66 [WARM] | PID: 6 | Heat: 42 | schedtest
+  [SKIPPED] PID: 7 | Heat: 56 | Waited: 4 | Temp: 89
+  [SKIPPED] PID: 8 | Heat: 32 | Waited: 3 | Temp: 89
+  [THERMAL] Temp: 89 [HOT ] | PID: 9 | Heat: 8 | schedtest | 2 skipped
+  [SKIPPED] PID: 6 | Heat: 42 | Waited: 5 | Temp: 87
+  [SKIPPED] PID: 7 | Heat: 36 | Waited: 10 | Temp: 87
+  [THERMAL] Temp: 87 [HOT ] | PID: 8 | Heat: 28 | schedtest | 2 skipped
+  [COOLING] Temp: 90/90  | Throttling -- idle cycle to cool down
+  [COOLING] Temp: 91/90  | Throttling -- idle cycle to cool down
+  [SKIPPED] PID: 7 | Heat: 30 | Waited: 0 | Temp: 89
+  [THERMAL] Temp: 89 [HOT ] | PID: 7 | Heat: 28 | schedtest
+  [SKIPPED] PID: 6 | Heat: 30 | Waited: 1 | Temp: 88
+  [SKIPPED] PID: 7 | Heat: 30 | Waited: 1 | Temp: 88
+  [THERMAL] Temp: 88 [HOT ] | PID: 9 | Heat: 0 | schedtest | 2 skipped
+  [SKIPPED] PID: 6 | Heat: 34 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 6 | Heat: 34 | Waited: 0 | Temp: 88
+  [THERMAL] Temp: 88 [HOT ] | PID: 7 | Heat: 22 | schedtest | 1 skipped
+  [THERMAL] Temp: 89 [HOT ] | PID: 8 | Heat: 8 | schedtest
+  [THERMAL] Temp: 89 [HOT ] | PID: 8 | Heat: 20 | schedtest
+  [COOLING] Temp: 90/90  | Throttling -- idle cycle to cool down
+  [COOLING] Temp: 90/90  | Throttling -- idle cycle to cool down
+  [COOLING] Temp: 91/90  | Throttling -- idle cycle to cool down
+  [SKIPPED] PID: 7 | Heat: 32 | Waited: 0 | Temp: 86
+  [THERMAL] Temp: 89 [HOT ] | PID: 7 | Heat: 24 | schedtest
+  [COOLING] Temp: 91/90  | Throttling -- idle cycle to cool down
+  [COOLING] Temp: 92/90  | Throttling -- idle cycle to cool down
+  [SKIPPED] PID: 6 | Heat: 34 | Waited: 0 | Temp: 86
+  [SKIPPED] PID: 7 | Heat: 32 | Waited: 0 | Temp: 86
+  [THERMAL] Temp: 88 [HOT ] | PID: 6 | Heat: 28 | schedtest
+  [SKIPPED] PID: 7 | Heat: 32 | Waited: 2 | Temp: 89
+  [THERMAL] Temp: 89 [HOT ] | PID: 10 | Heat: 2 | schedtest | 1 skipped
+  [COOLING] Temp: 90/90  | Throttling -- idle cycle to cool down
+  [THERMAL] Temp: 89 [HOT ] | PID: 8 | Heat: 22 | schedtest
+  [COOLING] Temp: 90/90  | Throttling -- idle cycle to cool down
+  [SKIPPED] PID: 6 | Heat: 34 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 6 | Heat: 34 | Waited: 0 | Temp: 88
+  [THERMAL] Temp: 88 [HOT ] | PID: 7 | Heat: 20 | schedtest | 1 skipped
+  [SKIPPED] PID: 7 | Heat: 30 | Waited: 1 | Temp: 88
+  [THERMAL] Temp: 86 [HOT ] | PID: 6 | Heat: 28 | schedtest | 2 skipped
+  [COOLING] Temp: 90/90  | Throttling -- idle cycle to cool down
+  [SKIPPED] PID: 6 | Heat: 46 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 7 | Heat: 48 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 6 | Heat: 54 | Waited: 0 | Temp: 87
+  [SKIPPED] PID: 6 | Heat: 54 | Waited: 0 | Temp: 87
+  [THERMAL] Temp: 87 [HOT ] | PID: 6 | Heat: 54 | schedtest | 2 skipped
+  [COOLING] Temp: 91/90  | Throttling -- idle cycle to cool down
+  [COOLING] Temp: 91/90  | Throttling -- idle cycle to cool down
+  [SKIPPED] PID: 6 | Heat: 88 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 7 | Heat: 58 | Waited: 1 | Temp: 88
+  [SKIPPED] PID: 6 | Heat: 88 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 7 | Heat: 58 | Waited: 1 | Temp: 88
+  [THERMAL] Temp: 88 [HOT ] | PID: 6 | Heat: 88 | schedtest | 4 skipped
+  [COOLING] Temp: 93/90  | Throttling -- idle cycle to cool down
+  [SKIPPED] PID: 6 | Heat: 94 | Waited: 0 | Temp: 86
+  [SKIPPED] PID: 6 | Heat: 94 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 7 | Heat: 64 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 6 | Heat: 94 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 7 | Heat: 64 | Waited: 0 | Temp: 88
+  [THERMAL] Temp: 88 [HOT ] | PID: 6 | Heat: 94 | schedtest | 4 skipped
+  [THERMAL] Temp: 92 [HOT ] | PID: 7 | Heat: 64 | schedtest | 3 skipped
+  [SKIPPED] PID: 6 | Heat: 98 | Waited: 0 | Temp: 83
+  [SKIPPED] PID: 6 | Heat: 98 | Waited: 0 | Temp: 61
+  [THERMAL] Temp: 61 [WARM] | PID: 6 | Heat: 98 | schedtest | 2 skipped
+  [THERMAL] Temp: 50 [COOL] | PID: 6 | Heat: 98 | schedtest
+  [THERMAL] Temp: 47 [COOL] | PID: 6 | Heat: 98 | schedtest
+  [THERMAL] Temp: 48 [COOL] | PID: 6 | Heat: 98 | schedtest
+  [THERMAL] Temp: 47 [COOL] | PID: 6 | Heat: 98 | schedtest

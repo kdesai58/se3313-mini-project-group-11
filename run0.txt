@@ -1,0 +1,63 @@
+  [THERMAL] Temp: 33 [COOL] | PID: 5 | Heat: 20 | schedtest
+  [THERMAL] Temp: 52 [COOL] | PID: 7 | Heat: 32 | schedtest
+  [THERMAL] Temp: 73 [WARM] | PID: 5 | Heat: 50 | schedtest
+  [SKIPPED] PID: 7 | Heat: 36 | Waited: 9 | Temp: 86
+  [SKIPPED] PID: 5 | Heat: 36 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 5 | Heat: 36 | Waited: 0 | Temp: 88
+  [THERMAL] Temp: 88 [HOT ] | PID: 7 | Heat: 16 | schedtest | 1 skipped
+  [SKIPPED] PID: 6 | Heat: 32 | Waited: 0 | Temp: 87
+  [SKIPPED] PID: 6 | Heat: 32 | Waited: 0 | Temp: 87
+  [THERMAL] Temp: 87 [HOT ] | PID: 5 | Heat: 28 | schedtest | 1 skipped
+  [THERMAL] Temp: 84 [HOT ] | PID: 5 | Heat: 26 | schedtest
+  [THERMAL] Temp: 87 [HOT ] | PID: 6 | Heat: 28 | schedtest
+  [COOLING] Temp: 90/90  | Throttling -- idle cycle to cool down
+  [COOLING] Temp: 90/90  | Throttling -- idle cycle to cool down
+  [THERMAL] Temp: 89 [HOT ] | PID: 5 | Heat: 28 | schedtest
+  [COOLING] Temp: 90/90  | Throttling -- idle cycle to cool down
+  [COOLING] Temp: 90/90  | Throttling -- idle cycle to cool down
+  [COOLING] Temp: 90/90  | Throttling -- idle cycle to cool down
+  [THERMAL] Temp: 82 [HOT ] | PID: 5 | Heat: 26 | schedtest
+  [THERMAL] Temp: 87 [HOT ] | PID: 7 | Heat: 14 | schedtest
+  [COOLING] Temp: 92/90  | Throttling -- idle cycle to cool down
+  [COOLING] Temp: 92/90  | Throttling -- idle cycle to cool down
+  [SKIPPED] PID: 6 | Heat: 36 | Waited: 0 | Temp: 89
+  [THERMAL] Temp: 89 [HOT ] | PID: 9 | Heat: 0 | schedtest | 1 skipped
+  [SKIPPED] PID: 5 | Heat: 32 | Waited: 1 | Temp: 89
+  [THERMAL] Temp: 89 [HOT ] | PID: 7 | Heat: 10 | schedtest | 1 skipped
+  [SKIPPED] PID: 6 | Heat: 32 | Waited: 0 | Temp: 89
+  [SKIPPED] PID: 6 | Heat: 32 | Waited: 0 | Temp: 89
+  [THERMAL] Temp: 89 [HOT ] | PID: 5 | Heat: 26 | schedtest | 1 skipped
+  [THERMAL] Temp: 86 [HOT ] | PID: 9 | Heat: 0 | schedtest
+  [SKIPPED] PID: 6 | Heat: 36 | Waited: 0 | Temp: 87
+  [SKIPPED] PID: 6 | Heat: 36 | Waited: 0 | Temp: 87
+  [THERMAL] Temp: 87 [HOT ] | PID: 6 | Heat: 36 | schedtest | 2 skipped
+  [SKIPPED] PID: 5 | Heat: 66 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 6 | Heat: 52 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 5 | Heat: 66 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 6 | Heat: 52 | Waited: 0 | Temp: 88
+  [THERMAL] Temp: 88 [HOT ] | PID: 5 | Heat: 66 | schedtest | 4 skipped
+  [SKIPPED] PID: 5 | Heat: 94 | Waited: 0 | Temp: 89
+  [SKIPPED] PID: 6 | Heat: 60 | Waited: 0 | Temp: 89
+  [SKIPPED] PID: 5 | Heat: 94 | Waited: 0 | Temp: 89
+  [SKIPPED] PID: 6 | Heat: 60 | Waited: 0 | Temp: 89
+  [THERMAL] Temp: 89 [HOT ] | PID: 5 | Heat: 94 | schedtest | 4 skipped
+  [SKIPPED] PID: 5 | Heat: 96 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 6 | Heat: 54 | Waited: 1 | Temp: 88
+  [SKIPPED] PID: 5 | Heat: 96 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 6 | Heat: 54 | Waited: 1 | Temp: 88
+  [THERMAL] Temp: 88 [HOT ] | PID: 5 | Heat: 96 | schedtest | 4 skipped
+  [SKIPPED] PID: 5 | Heat: 96 | Waited: 0 | Temp: 87
+  [SKIPPED] PID: 6 | Heat: 48 | Waited: 1 | Temp: 87
+  [SKIPPED] PID: 5 | Heat: 96 | Waited: 0 | Temp: 87
+  [SKIPPED] PID: 6 | Heat: 48 | Waited: 1 | Temp: 87
+  [THERMAL] Temp: 87 [HOT ] | PID: 5 | Heat: 96 | schedtest | 4 skipped
+  [COOLING] Temp: 93/90  | Throttling -- idle cycle to cool down
+  [SKIPPED] PID: 5 | Heat: 96 | Waited: 0 | Temp: 87
+  [SKIPPED] PID: 6 | Heat: 46 | Waited: 1 | Temp: 87
+  [SKIPPED] PID: 5 | Heat: 96 | Waited: 0 | Temp: 87
+  [SKIPPED] PID: 6 | Heat: 46 | Waited: 1 | Temp: 87
+  [THERMAL] Temp: 87 [HOT ] | PID: 5 | Heat: 96 | schedtest | 4 skipped
+  [SKIPPED] PID: 5 | Heat: 96 | Waited: 0 | Temp: 88
+  [SKIPPED] PID: 5 | Heat: 96 | Waited: 0 | Temp: 88
+  [THERMAL] Temp: 88 [HOT ] | PID: 4 | Heat: 0 | schedtest | 2 skipped
+  [THERMAL] Temp: 54 [COOL] | PID: 5 | Heat: 98 | schedtest
